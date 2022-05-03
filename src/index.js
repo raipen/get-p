@@ -1,14 +1,34 @@
-const express = require("express");
-const config = require("./config");
-const loaders = require("./loaders");
+// Module
+const express = require('express');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const { connectToServer } = require('./connect');
+const { PORT } = require('./config');
+const app = express();
 
-async function startServer(){
-    const app = express();
-    loaders(app);
-    
-    app.listen(config.port, () => {
-        console.log(config.port+"로 듣고있어요");
-    });
-}
+// Connect to MongoDB Atlas
+connectToServer(() => {});
 
-startServer();
+// Middle-ware settings
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+    session({
+        resave: false,
+        saveUninitialized: true,
+        secret: "get-p",
+        cookie: {
+            httpOnly: true,
+            secure: false
+        }
+    })
+);
+
+// Routes
+app.use('/api/user', require('./routes/userRouter'));
+
+// Port settings
+app.listen(PORT, () => {
+    console.log(`Express is listening on ${PORT}`);
+});
