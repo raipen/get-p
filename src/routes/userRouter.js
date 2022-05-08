@@ -4,6 +4,14 @@ const router = express.Router();
 const crypto = require('crypto');
 const User = require('../models/User');
 
+router.post('/test',async(req,res)=>{
+    const { email, password } = req.body;
+    console.log("test");
+    await User.find({}).then(data=>{
+        console.log(data);
+    }).catch(err=>console.log(err));
+});
+
 // Join Membership
 router.post('/signup', async (req, res) => {
     const { email, password } = req.body;

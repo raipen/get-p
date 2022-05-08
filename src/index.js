@@ -2,7 +2,7 @@
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const { connectToServer } = require('./connect');
+const connectToServer = require('./connect');
 const { PORT } = require('./config');
 const cors = require('cors');
 const app = express();
@@ -26,6 +26,7 @@ app.use(
         }
     })
 );
+
 
 // Routes
 app.use('/api/user', require('./routes/userRouter'));
