@@ -4,12 +4,14 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const { connectToServer } = require('./connect');
 const { PORT } = require('./config');
+const cors = require('cors');
 const app = express();
 
 // Connect to MongoDB Atlas
 connectToServer(() => {});
 
 // Middle-ware settings
+app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
