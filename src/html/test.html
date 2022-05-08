@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        jQuery.fn.serializeObject = function() {
+            var obj = null;
+            try {
+                if (this[0].tagName && this[0].tagName.toUpperCase() == "FORM") {
+                    var arr = this.serializeArray();
+                    if (arr) {
+                        obj = {};
+                        jQuery.each(arr, function() {
+                            obj[this.name] = this.value;
+                        });
+                    }
+                }
+            } catch (e) {
+                alert(e.message);
+            } finally {
+            }
+        
+            return obj;
+        };
+
+        var paramCount = 0;
+
+        function makeParam(q){
+            var obj={};
+            for(var i = 0;i<paramCount;i++){
+                obj[q['key'+i]]=q['value'+i];
+            }
+            return obj;
+        }
+
+        $(document).ready(function(){
+            $("#submit").on("click",e=>{
+                var queryString = $("#form").serializeObject();
+                var paramData = makeParam(queryString);
+                $.ajax({
+                    url:queryString.url,
+                    type:queryString.type,
+                    data: paramData,
+                    async: false
+                }).done(function(data){
+                    console.log(queryString.url+"\n"+"\n성공");
+                    console.log(data);
+                }).fail(function(jq,status,error){
+                    console.log(status);
+                    console.log(error);
+                });
+            });
+            $("#addParam").on("click",e=>{
+                $("#param").append(`
+                <label for="param${paramCount}" class="param">
+                    <span>key${paramCount}</span>
+                    <input type="text" name="key${paramCount}">
+                    <span>value${paramCount}</span>
+                    <input type="text" name="value${paramCount}">
+                </label>`
+                );
+                paramCount++;
+            });
+            $("#removeParam").on("click",e=>{
+                if(paramCount==0){
+                    alert("삭제할 파라미터가 없습니다");
+                    return;
+                }
+                $("#param").children().last().remove();
+                paramCount--;
+            });
+        });
+        
+    </script>
+    <style>
+        *{
+            font-size:25px;
+        }
+        input[name=url]{
+            width:calc(100% - 100px);
+        }
+        .param{
+            text-align: center;
+            display:grid;
+            grid-template-columns: 65px 3fr 80px 7fr;
+        }
+        .param>input{
+            width:calc(100% - 10px);
+        }
+    </style>
+</head>
+<body>
+    <form id="form" onsubmit="return false">
+        <label for="url">
+            <span>url</span>
+            <input type="text" name="url">
+        </label>
+        <br>
+        <label for="type">
+            <input type='radio' name='type' value='GET' checked/><span>GET</span>
+            <input type='radio' name='type' value='POST' /><span>POST</span>
+        </label>
+        <br>
+        <br>
+        <div id="param">
+        </div>
+        <button id="addParam">
+            add parameter
+        </button>
+        <button id="removeParam">
+            remove parameter
+        </button>
+        <br>
+        <br>
+        <button type="submit" id="submit">제출</button>
+    </form>
+</body>
+</html>

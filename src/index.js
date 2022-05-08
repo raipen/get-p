@@ -29,6 +29,7 @@ app.use(
 
 // Routes
 app.use('/api/user', require('./routes/userRouter'));
+app.use('/api/test',require('./routes/testTool'));
 
 // Port settings
 app.listen(PORT, () => {
