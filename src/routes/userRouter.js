@@ -9,39 +9,52 @@ router.post('/test',async(req,res)=>{
     console.log("test");
     await User.find({}).then(data=>{
         console.log(data);
-    }).catch(err=>console.log(err));
+        res.json(data);
+    }).catch(err=>{
+        console.log(err);
+        res.json(err);
+    });
 });
 
 // Join Membership
 router.post('/signup', async (req, res) => {
     const { email, password } = req.body;
-    // Username duplicate check
-    let user = await User.findOne({ email });
-    // When username is duplicated
-    if (user) {
-        res.json({ message: '이미 가입된 이메일 입니다. 다른 이메일을 입력해주세요.' });
-    } else {
-        try { 
-            crypto.randomBytes(64, (err, buf) => {
-                if (!err) {
-                    crypto.pbkdf2(password, buf.toString('base64'), 100000, 64, 'sha512', async (err, key) => {
-                        if (!err) {
-                            user = new User({
-                                email,
-                                password: key.toString('base64'),
-                                salt: buf.toString('base64'),
-                            });
-                            await user.save();
-                            console.log(`[/user/signup] ${email}`)
-                            res.json({ message: '회원 가입이 완료되었습니다.' });
-                        }
-                    });
-                }
-            });
-        } catch (err) {
-            console.log(err);
-            res.json({ message: '회원 가입에 문제가 생겼습니다. 다시 시도해주세요.' });
-        }
+    var emailReg = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+    var passReg = /^.*(?=^.{8,15}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
+    switch(true){
+        case !emailReg.test(email):
+            res.json({ message: '올바른 이메일을 입력해주세요.' });
+            break;
+        case !passReg.test(password):
+            res.json({ message: '올바른 비밀번호를 입력해주세요.' });
+            break;
+        default:
+            let user = await User.findOne({ email });
+            if(user){
+                res.json({ message: '이미 가입된 이메일 입니다. 다른 이메일을 입력해주세요.' });
+                break;
+            }
+            try { 
+                crypto.randomBytes(64, (err, buf) => {
+                    if (!err) {
+                        crypto.pbkdf2(password, buf.toString('base64'), 100000, 64, 'sha512', async (err, key) => {
+                            if (!err) {
+                                user = new User({
+                                    email,
+                                    password: key.toString('base64'),
+                                    salt: buf.toString('base64'),
+                                });
+                                await user.save();
+                                console.log(`[/user/signup] ${email}`)
+                                res.json({ message: '회원 가입이 완료되었습니다.' });
+                            }
+                        });
+                    }
+                });
+            } catch (err) {
+                console.log(err);
+                res.json({ message: '회원 가입에 문제가 생겼습니다. 다시 시도해주세요.' });
+            }
     }
 });
 
