@@ -4,13 +4,12 @@ const router = express.Router();
 const crypto = require('crypto');
 const User = require('../models/User');
 
-router.post('/test',async(req,res)=>{
-    const { email, password } = req.body;
+router.post('/test', async(req, res)=>{
     console.log("test");
-    await User.find({}).then(data=>{
+    await User.find({}).then(data => {
         console.log(data);
         res.json(data);
-    }).catch(err=>{
+    }).catch(err => {
         console.log(err);
         res.json(err);
     });
@@ -18,20 +17,21 @@ router.post('/test',async(req,res)=>{
 
 // Join Membership
 router.post('/signup', async (req, res) => {
+    const emailReg = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+    const passReg = /^.*(?=^.{8,15}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
     const { email, password } = req.body;
-    var emailReg = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
-    var passReg = /^.*(?=^.{8,15}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
-    switch(true){
+
+    switch (true) {
         case !emailReg.test(email):
-            res.json({ message: '올바른 이메일을 입력해주세요.' });
+            res.json({ message: '올바른 이메일을 입력해주세요.', result: false });
             break;
         case !passReg.test(password):
-            res.json({ message: '올바른 비밀번호를 입력해주세요.' });
+            res.json({ message: '올바른 비밀번호를 입력해주세요.', result: false });
             break;
         default:
             let user = await User.findOne({ email });
-            if(user){
-                res.json({ message: '이미 가입된 이메일 입니다. 다른 이메일을 입력해주세요.' });
+            if (user) {
+                res.json({ message: '이미 가입된 이메일 입니다. 다른 이메일을 입력해주세요.', result: false });
                 break;
             }
             try { 
@@ -46,14 +46,14 @@ router.post('/signup', async (req, res) => {
                                 });
                                 await user.save();
                                 console.log(`[/user/signup] ${email}`)
-                                res.json({ message: '회원 가입이 완료되었습니다.' });
+                                res.json({ message: '회원 가입이 완료되었습니다.', result: true });
                             }
                         });
                     }
                 });
             } catch (err) {
                 console.log(err);
-                res.json({ message: '회원 가입에 문제가 생겼습니다. 다시 시도해주세요.' });
+                res.json({ message: '회원 가입에 문제가 생겼습니다. 다시 시도해주세요.', result: false });
             }
     }
 });
@@ -73,18 +73,18 @@ router.post('/login', async (req, res) => {
                     if (user) {
                         req.session.email = email;
                         console.log(`[/user/login] ${email}`);
-                        res.json({ message: '로그인 되었습니다.' });
+                        res.json({ message: '로그인 되었습니다.', result: true });
                     } else {
-                        res.json({ message: '이메일 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.' });
+                        res.json({ message: '이메일 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.', result: false });
                     }
                 }
             })
         } catch (err) {
             console.log(err);
-            res.json({ message: '로그인에 문제가 생겼습니다. 다시 시도해주세요.' });
+            res.json({ message: '로그인에 문제가 생겼습니다. 다시 시도해주세요.', result: false });
         }  
     } else {
-        res.json({ message: '이메일 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.' });
+        res.json({ message: '이메일 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.', result: false });
     }
 });
 
@@ -93,7 +93,7 @@ router.get('/logout', (req, res) => {
     console.log(`[/user/logout] ${req.session.email}`);
     // Destroy session
     req.session.destroy(() => { 
-        res.json({ message: '로그아웃 하였습니다.' }); 
+        res.json({ message: '로그아웃 하였습니다.', result: true }); 
     });
 });
 
@@ -102,10 +102,10 @@ router.post('/delete', async (req, res) => {
     try {
         let user = await User.findOne({ email });
         await User.deleteOne({ _id: user._id });
-        res.json({ message: '회원 탈퇴를 완료했습니다.' });
+        res.json({ message: '회원 탈퇴를 완료했습니다.', result: true });
     } catch (err) {
         console.log(err);
-        res.json({ message: '회원 탈퇴에 문제가 생겼습니다. 다시 시도해주세요.' });
+        res.json({ message: '회원 탈퇴에 문제가 생겼습니다. 다시 시도해주세요.', result: false });
     }
 });
 

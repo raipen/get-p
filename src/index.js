@@ -27,9 +27,8 @@ app.use(
     })
 );
 
-
 // Routes
-app.use('/api/user', require('./routes/userRouter'));
+app.use('/api/users', require('./routes/users'));
 app.use('/api/test',require('./routes/testTool'));
 
 // Port settings
