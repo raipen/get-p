@@ -2,13 +2,13 @@
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const connectToServer = require('./connect');
+const connectToDB = require('./loaders/mongoose');
 const { PORT } = require('./config');
 const cors = require('cors');
 const app = express();
 
 // Connect to MongoDB Atlas
-connectToServer(() => {});
+connectToDB(() => {});
 
 // Middle-ware settings
 app.use(cors());
@@ -28,8 +28,8 @@ app.use(
 );
 
 // Routes
-app.use('/api/users', require('./routes/users'));
-app.use('/api/test',require('./routes/testTool'));
+app.use('/api/users', require('./api/routes/users'));
+app.use('/api/test', require('./api/routes/testTool'));
 
 // Port settings
 app.listen(PORT, () => {
