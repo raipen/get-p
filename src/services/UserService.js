@@ -29,31 +29,32 @@ class UserService {
         }
     }
 
+
     async generateUser(email,password){
-        try{
-            crypto.randomBytes(64, (err, buf) => {
-                if (!err) {
-                    crypto.pbkdf2(password, buf.toString('base64'), 100000, 64, 'sha512', async (err, key) => {
-                        if (!err) {
-                            user = await new User({
-                                email,
-                                password: key.toString('base64'),
-                                salt: buf.toString('base64'),
-                            });
-                            await user.save();
-                            console.log(`[/user/signup] ${email}`);
-                            return new Promise((resolve, reject) =>{
+        return new Promise((resolve, reject) => {
+            try{
+                crypto.randomBytes(64, (err, buf) => {
+                    if (!err) {
+                        crypto.pbkdf2(password, buf.toString('base64'), 100000, 64, 'sha512', async (err, key) => {
+                            if (!err) {
+                                let user = new User({
+                                    email,
+                                    password: key.toString('base64'),
+                                    salt: buf.toString('base64'),
+                                });
+                                await user.save();
+                                console.log(`[/user/signup] ${email}`);
                                 resolve({ message: '회원 가입이 완료되었습니다.', result: true });
-                            });
-                        }
-                    });
-                }
-            });
-        }catch(err){
-            return new Promise((resolve, reject) =>{
-                resolve()
-            });
-        }
+                            }
+                        });
+                    }
+                });
+            }catch(err){
+                console.log("error");
+                resolve();
+            }
+        })
+        
     }
 
     async SignIn(userDTO) {
