@@ -26,6 +26,17 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+router.get('/verify', async (req, res) => {
+    const userDTO = req.query;
+    try {
+        await UserService.Verify(userDTO);
+        console.log(`[/users/verify]`);
+        res.json({ message: '이메일 인증이 완료되었습니다.', result: true });
+    } catch (err) {
+        res.json({ message: err, result: false});
+    }
+});
+
 // Sign In
 router.post('/signin', async (req, res) => {
     const userDTO = req.body;

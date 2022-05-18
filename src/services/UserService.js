@@ -96,6 +96,18 @@ class UserService {
         });
     }
 
+    async Verify(userDto){
+        const { email, code } = userDto;
+        try {
+            const emailModel = await Email.findOne({ email }).select({ code: 1 });
+            if (code !== emailModel.code) throw '이메일 인증에 문제가 생겼습니다. 다시 시도해주세요.';
+
+        } catch (err) {
+            console.log(err);
+            throw '이메일 인증에 문제가 생겼습니다. 다시 시도해주세요.';
+        }
+    }
+
     async SignIn(userDTO) {
         const { email, password } = userDTO;
         try {
