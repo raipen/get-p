@@ -17,6 +17,7 @@
     "express-session": "^1.17.2",
     "mongodb": "^4.5.0",
     "mongoose": "^6.3.2",
+    "nodemailer": "^6.7.5",
     "nodemon": "^2.0.16"
   }
 }

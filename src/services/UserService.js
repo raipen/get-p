@@ -1,5 +1,19 @@
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const { MAILADDRESS, MAILPASSWORD } = require('../config');
 const User = require('../models/User');
+const Email = require('../models/Email');
+const transporter = nodemailer.createTransport({
+    service:"gmail",
+    host: 'smtp.gmail.com',
+    secure: true,  //다른 포트를 사용해야 되면 false값을 주어야 합니다.
+    port: 465,   //구글 메일서버 포트
+    auth: {
+        user: MAILADDRESS,
+        pass: MAILPASSWORD
+    }
+})//너무 많이 시도해서 락 걸렸을 때 https://accounts.google.com/DisplayUnlockCaptcha 에서 승인
+
 
 class UserService {
     isValidEmail(email) {
@@ -20,6 +34,29 @@ class UserService {
         }
     }
 
+    SendVerifyMail(email){
+        crypto.randomBytes(64, async (err, buf) => {
+            if (err) throw err;
+            let code = buf.toString('base64url');
+            const emailModel = new Email({
+                email,
+                code: code
+            })
+            await emailModel.save();
+            let info = await transporter.sendMail({
+                from: `"Get-P" <${MAILADDRESS}>`,
+                to: email,
+                subject: `[Get-P]이메일 인증`,
+                html: `<p>인증을 완료해주세요</p>
+                <p><a href="http://localhost:8080/api/users/verify/?email=${email}&code=${code}">인증하기</a></p>`
+            });
+            console.log("[/users/signup] send verify email "+ email);
+            for(let key in info){
+                console.log('키 : '+key + ', 값 : ' + info[key])
+            }
+        });
+    }
+    
     async SignUp(userDTO) {
         const { email, password } = userDTO;
         switch (true) {
@@ -49,8 +86,10 @@ class UserService {
                         email,
                         password: key.toString('base64'),
                         salt: buf.toString('base64'),
+                        verify: false
                     });
                     await user.save();
+                    this.SendVerifyMail(email);
                     resolve(user._id);
                 });
             });
