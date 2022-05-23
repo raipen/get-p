@@ -3,6 +3,8 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const api = require("../api");
+const passport = require('passport');
+const passportConfig = require('./passport');
 
 async function express_loader(app){
     // Middle-ware settings
@@ -21,6 +23,8 @@ async function express_loader(app){
             }
         })
     );
+    app.use(passport.initialize());
+    passportConfig();
 
     // API Route
     app.use(require("../api"));

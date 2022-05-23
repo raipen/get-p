@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const UserService = require('../../services/UserService');
+const EmailService = require('./EmailService');
 
 // Return a list of all users
 router.post('/list', async (req, res) => {
@@ -26,10 +27,11 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+// Verify email
 router.get('/verify', async (req, res) => {
-    const userDTO = req.query;
+    const emailDTO = req.query;
     try {
-        await UserService.Verify(userDTO);
+        await EmailService.Verify(emailDTO);
         console.log(`[/users/verify]`);
         res.json({ message: '이메일 인증이 완료되었습니다.', result: true });
     } catch (err) {

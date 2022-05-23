@@ -5,8 +5,9 @@ dotenv.config();
 const config = {
     PORT: process.env.PORT,
     DB_URI: process.env.DB_URI,
-    MAILADDRESS: process.env.MAILADDRESS,
-    MAILPASSWORD: process.env.MAILPASSWORD
+    MAIL_ADDRESS: process.env.MAIL_ADDRESS,
+    MAIL_PASSWORD: process.env.MAIL_PASSWORD,
+    JWT_SECRET: process.env.JWT_SECRET
 }
 
 module.exports = config;
