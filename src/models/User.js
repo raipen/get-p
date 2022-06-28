@@ -8,10 +8,15 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     salt: {
         type: String,
+        required: true
+    },
+    verify: {
+        type: Boolean,
         required: true
     },
     createdAt: {

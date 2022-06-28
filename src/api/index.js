@@ -1,7 +1,9 @@
 const { Router } = require('express');
-
 const app = Router();
-app.use('/api/users', require('./routes/users'));
-app.use('/api/test', require('./routes/testTool'));
+
+app.use('/users', require('./routes/users'));
+app.use('/company', require('./routes/company'));
+app.use('/projects', require('./routes/projects'));
+app.use('/test', require('./routes/testTool'));
 
 module.exports = app;
