@@ -1,17 +1,21 @@
 // Module
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
+
+// Services
 const UserService = require('../../services/UserService');
-const EmailService = require('./EmailService');
+const EmailService = require('../../services/EmailService');
+const { JWT_SECRET } = require('../../config');
 
 // Return a list of all users
-router.post('/list', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const userList = await UserService.UserList();
-        console.log(`[/users/list]`);
-        res.json(userList);
+        res.status(200).json(userList);
     } catch (err) {
-        res.json({ message: err, result: false});
+        res.status(400).json({ message: err });
     }
 });
 
@@ -21,9 +25,9 @@ router.post('/signup', async (req, res) => {
     try {
         await UserService.SignUp(userDTO);
         console.log(`[/users/signup] ${userDTO.email}`);
-        res.json({ message: '회원 가입이 완료되었습니다.', result: true });
+        res.status(201).send();
     } catch (err) {
-        res.json({ message: err, result: false});
+        res.status(400).json({ message: err });
     }
 });
 
@@ -31,44 +35,46 @@ router.post('/signup', async (req, res) => {
 router.get('/verify', async (req, res) => {
     const emailDTO = req.query;
     try {
-        await EmailService.Verify(emailDTO);
-        console.log(`[/users/verify]`);
-        res.json({ message: '이메일 인증이 완료되었습니다.', result: true });
+        await EmailService.VerifyEmail(emailDTO);
+        console.log(`[/users/verify] ${emailDTO.email} verify success`);
+        res.status(200).send();
     } catch (err) {
-        res.json({ message: err, result: false});
+        console.log(`[/users/verify] ${emailDTO.email} verify false`);
+        res.status(400).json({ message: err });
     }
 });
 
 // Sign In
-router.post('/signin', async (req, res) => {
-    const userDTO = req.body;
+router.post('/signin', async (req, res, next) => {
     try {
-        await UserService.SignIn(userDTO);
-        console.log(`[/users/signin] ${userDTO.email}`);
-        req.session.email = email;
-        res.json({ message: '로그인 되었습니다.', result: true });
-    } catch (err) {
-        res.json({ message: err, result: false });
+        passport.authenticate('local', (authError, user, info) => {
+            if (authError || !user) {
+                res.status(400).json({ message: info.reason })
+                return;
+            }
+            req.login(user, { session: false }, (loginError) => {
+                if (loginError) {
+                    res.send(loginError);
+                    return;
+                }
+                const token = jwt.sign({ _id: user._id, email: user.email }, JWT_SECRET);
+                res.status(200).json(token);
+            });
+        })(req, res);
+    } catch (error) {
+        console.error(error);
+        next(error);
     }
 });
 
-// Logout
-router.get('/logout', (req, res) => {
-    console.log(`[/users/logout] ${req.session.email}`);
-    // Destroy session
-    req.session.destroy(() => { 
-        res.json({ message: '로그아웃 하였습니다.', result: true }); 
-    });
-});
-
 // Withdrawal
-router.post('/delete', async (req, res) => {
+router.post('/delete',  passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        await UserService.Delete(req.session.email);
-        console.log(`[/users/delete] ${req.session.email}`);
-        res.json({ message: '회원 탈퇴를 완료했습니다.', result: true });
+        await UserService.Delete(req.user.email);
+        console.log(`[/users/delete] ${req.user.email}`);
+        res.status(200).send();
     } catch (err) {
-        res.json({ message: err, result: false });
+        res.status(400).json({ message: err });
     }
 });
 

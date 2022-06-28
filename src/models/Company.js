@@ -6,10 +6,10 @@ const companySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    // // 기업 프로필 사진
-    // companyImage: {
-    //     type: mongoose.ObjectId,
-    // },
+    // 기업 프로필 사진
+    companyImage: {
+        type: String,
+    },
     // 업종
     industry: {
         type: String,
@@ -39,7 +39,7 @@ const companySchema = new mongoose.Schema({
         required: true,
     },
     // 계정
-    userId: {
+    userObjectId: {
         type: mongoose.ObjectId,
         required: true
     }

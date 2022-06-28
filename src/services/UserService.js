@@ -54,7 +54,7 @@ class UserService {
                     });
                     await user.save();
                     EmailService.SendVerifyEmail(email);
-                    resolve(user._id);
+                    resolve(user);
                 });
             });
         });
@@ -63,7 +63,7 @@ class UserService {
     async SignIn(userDTO) {
         const { email, password } = userDTO;
         try {
-            const user = await User.findOne({ email }).select({ salt: 1 });
+            const user = await User.findOne({ email })
             if (!await this.Authorize(email, password, user.salt)) throw '이메일 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.';
         } catch (err) {
             console.log(err);
@@ -93,7 +93,7 @@ class UserService {
             const user = await User.findOne({ email });
             await User.deleteOne({ _id: user._id });
         } catch (err) {
-            console.log(err);
+            console.err(err);
             throw '회원 탈퇴에 문제가 생겼습니다. 다시 시도해주세요.';
         }
     }
@@ -102,7 +102,7 @@ class UserService {
         try {
             return await User.find({});
         } catch (err) {
-            console.log(err);
+            console.err(err);
             throw '사용자 목록을 조회하는데 오류가 발생했습니다. 다시 시도해주세요.';
         }
     }

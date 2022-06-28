@@ -15,9 +15,9 @@ class CompanyService {
             email,
             password
         } = companyDTO;
-
         try {
-            const userId = await UserService({ email, password });
+            const user = await UserService.SignUp({ email, password });
+            const userObjectId = user._id;
             const company = new Company({
                 companyName,
                 // companyImage,
@@ -27,7 +27,7 @@ class CompanyService {
                 phoneNumber,
                 url,
                 address,
-                userId
+                userObjectId
             });
             await company.save();
         } catch (err) {
